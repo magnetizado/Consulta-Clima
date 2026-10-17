@@ -11,22 +11,21 @@ atuais e previsões em uma página web.
 ## Estado atual
 
 - `app/main.py` cria o cliente OpenWeatherMap e serve os arquivos em `static/`.
-- `GET /api/weather/current` consulta as condições atuais e mantém a chave no servidor.
-- `app/api/routes.py` contém outras rotas planejadas, mas ainda depende de módulos
-  de domínio e schemas que não foram implementados nem registrados na aplicação.
-- Os módulos de domínio e schemas esperados por `app/api/routes.py` ainda precisam
-  ser implementados.
+- `GET /api/weather/current` consulta as condições atuais para o cartão inicial.
+- `GET /api/weather`, `/api/geo/search`, `/api/geo/reverse` e
+  `/api/tiles/precipitation/{z}/{x}/{y}.png` estão conectadas ao cliente do provedor.
+- Os módulos de domínio e schemas dão às rotas contratos de resposta consistentes,
+  documentados abaixo.
 - A chave da OpenWeatherMap não deve ser versionada. O arquivo `.env` é ignorado pelo
-  Git; use `.env.example` como referência ao configurar a integração futuramente.
+  Git; o servidor precisa dela para iniciar.
 
 ## Requisitos
 
 - Python 3.13.5
 - Git
-- Uma chave da OpenWeatherMap será necessária quando a integração com o provedor
-  estiver implementada.
+- Uma chave válida da OpenWeatherMap, configurada localmente no arquivo `.env`.
 
-## Executar a página inicial
+## Executar localmente
 
 Crie e ative o ambiente Python e instale as dependências:
 
@@ -43,8 +42,8 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 ```
 
-Crie o arquivo `.env` a partir do exemplo e preencha sua própria chave da OpenWeatherMap.
-Não publique esse arquivo:
+Se ainda não tiver um arquivo `.env`, crie-o a partir do exemplo e preencha sua própria
+chave da OpenWeatherMap. Se já existir, não o sobrescreva. Nunca publique esse arquivo:
 
 ```bash
 cp .env.example .env
@@ -63,12 +62,26 @@ Ao carregar a página, o navegador solicita sua localização. Se ela não estiv
 o painel consulta Uberlândia como localização padrão. Cada atualização consulta o endpoint
 de condições atuais da OpenWeatherMap.
 
+## Contrato inicial da API
+
+As rotas recebem apenas parâmetros públicos. O servidor acrescenta a chave do provedor;
+ela nunca é devolvida nas respostas.
+
+- `GET /api/weather?lat={latitude}&lon={longitude}` devolve `timezone_offset` e os blocos
+  disponíveis `current`, `minutely`, `hourly`, `daily` e `alerts`. Cada bloco contém os
+  registros normalizados recebidos do cliente OpenWeatherMap.
+- `GET /api/geo/search?q={termo}` devolve `{"results":[...]}`. Cada cidade inclui `name`,
+  `lat`, `lon`, `country` e, quando disponível, `state`.
+- `GET /api/geo/reverse?lat={latitude}&lon={longitude}` devolve `{"result":...}` ou
+  `{"result":null}` quando nenhuma cidade é encontrada.
+- `GET /api/tiles/precipitation/{z}/{x}/{y}.png` devolve uma imagem PNG da camada de chuva.
+
 ## Próximos passos
 
-1. Implementar e conectar a busca de cidades e a localização reversa.
-2. Implementar as previsões diária, por hora e por minuto.
+1. Conectar a busca de cidades e a localização reversa ao frontend.
+2. Mostrar as previsões diária, por hora e por minuto na interface.
 3. Adicionar o mapa de precipitação e completar os estados da interface.
-4. Implementar as rotas restantes, schemas, testes e documentação do projeto.
+4. Expandir os testes do navegador e atualizar a documentação dos requisitos.
 
 ## Segurança
 

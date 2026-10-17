@@ -11,6 +11,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.current import router as current_router
+from app.api.routes import InvalidRequestError
+from app.api.routes import router as api_router
 from app.clients.openweather import OpenWeatherClient, ProviderError
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -43,11 +45,20 @@ def create_app(client: OpenWeatherClient | None = None) -> FastAPI:
 
     app = FastAPI(title="Consulta Clima", lifespan=lifespan)
     app.include_router(current_router)
+    app.include_router(api_router)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+    @app.exception_handler(InvalidRequestError)
+    async def invalid_request_handler(
+        _request: Request, _error: InvalidRequestError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=400,
+            content={"error": {"code": "invalid_request"}},
+        )
+
     @app.exception_handler(ProviderError)
-    async def provider_error_handler(request: Request, error: ProviderError) -> JSONResponse:
-        del request
+    async def provider_error_handler(_request: Request, error: ProviderError) -> JSONResponse:
         return JSONResponse(
             status_code=PROVIDER_ERROR_STATUS[error.code],
             content={"error": {"code": error.code}},
