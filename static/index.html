@@ -14,6 +14,30 @@
         <h1>Consulta Clima</h1>
       </header>
 
+      <form class="city-search" id="city-search">
+        <label for="city-query">Consultar outra cidade</label>
+        <div class="city-search__controls">
+          <input
+            id="city-query"
+            name="city"
+            type="search"
+            minlength="2"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="Ex.: Curitiba"
+            required
+          >
+          <button id="search-submit" type="submit">Buscar</button>
+        </div>
+        <p class="city-search__message" id="search-message" role="status" aria-live="polite"></p>
+        <ul
+          class="city-search__results"
+          id="search-results"
+          aria-label="Resultados da busca"
+          aria-live="polite"
+        ></ul>
+      </form>
+
       <section class="weather-card" aria-labelledby="weather-title">
         <p class="weather-card__location" id="location">Buscando localização…</p>
         <div class="weather-card__main">

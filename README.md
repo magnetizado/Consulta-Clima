@@ -4,9 +4,8 @@ Dashboard de clima em desenvolvimento para a especialização em Engenharia de S
 da UFG. O objetivo do projeto é consultar a OpenWeatherMap e apresentar as condições
 atuais e previsões em uma página web.
 
-> **Status: trabalho em andamento.** O servidor entrega uma página com condições
-> meteorológicas atuais, obtidas por uma rota da API. Previsões, busca de cidades e
-> mapa ainda não estão implementados.
+> **Status: trabalho em andamento.** O painel mostra as condições atuais e permite
+> buscar cidades. As previsões e o mapa ainda não estão implementados no frontend.
 
 ## Estado atual
 
@@ -14,6 +13,7 @@ atuais e previsões em uma página web.
 - `GET /api/weather/current` consulta as condições atuais para o cartão inicial.
 - `GET /api/weather`, `/api/geo/search`, `/api/geo/reverse` e
   `/api/tiles/precipitation/{z}/{x}/{y}.png` estão conectadas ao cliente do provedor.
+- O painel usa a geolocalização do navegador e permite pesquisar e selecionar uma cidade.
 - Os módulos de domínio e schemas dão às rotas contratos de resposta consistentes,
   documentados abaixo.
 - A chave da OpenWeatherMap não deve ser versionada. O arquivo `.env` é ignorado pelo
@@ -58,9 +58,10 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --env-file .env --reload
 Abra <http://127.0.0.1:8000>. No Codespaces, encaminhe a porta `8000` pela aba
 **Ports** para acessar a página.
 
-Ao carregar a página, o navegador solicita sua localização. Se ela não estiver disponível,
-o painel consulta Uberlândia como localização padrão. Cada atualização consulta o endpoint
-de condições atuais da OpenWeatherMap.
+Ao carregar a página, o navegador solicita sua localização e o painel tenta identificar
+o nome da cidade. Se a localização não estiver disponível, consulta Uberlândia como padrão.
+Use **Consultar outra cidade** para buscar e selecionar um resultado. Cada atualização do
+cartão consulta o endpoint de condições atuais da OpenWeatherMap.
 
 ## Contrato inicial da API
 
@@ -78,10 +79,9 @@ ela nunca é devolvida nas respostas.
 
 ## Próximos passos
 
-1. Conectar a busca de cidades e a localização reversa ao frontend.
-2. Mostrar as previsões diária, por hora e por minuto na interface.
-3. Adicionar o mapa de precipitação e completar os estados da interface.
-4. Expandir os testes do navegador e atualizar a documentação dos requisitos.
+1. Mostrar as previsões diária, por hora e por minuto na interface.
+2. Adicionar o mapa de precipitação e completar os estados da interface.
+3. Expandir os testes do navegador e atualizar a documentação dos requisitos.
 
 ## Segurança
 

@@ -83,8 +83,11 @@ def test_page_and_frontend_script_are_served(monkeypatch: pytest.MonkeyPatch) ->
 
     assert page.status_code == 200
     assert "Condições atuais" in page.text
+    assert "Consultar outra cidade" in page.text
     assert script.status_code == 200
     assert "api/weather/current" in script.text
+    assert "api/geo/search" in script.text
+    assert "api/geo/reverse" in script.text
 
 
 def test_server_requires_api_key_when_using_real_provider(monkeypatch: pytest.MonkeyPatch) -> None:
