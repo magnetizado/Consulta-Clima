@@ -4,16 +4,19 @@ Dashboard de clima em desenvolvimento para a especialização em Engenharia de S
 da UFG. O objetivo do projeto é consultar a OpenWeatherMap e apresentar as condições
 atuais e previsões em uma página web.
 
-> **Status: trabalho em andamento.** O painel mostra as condições atuais e permite
-> buscar cidades. As previsões e o mapa ainda não estão implementados no frontend.
+> **Status: trabalho em andamento.** O painel mostra as condições atuais, permite
+> buscar cidades e apresenta previsões diária, horária e por minuto. O mapa ainda
+> não está implementado.
 
 ## Estado atual
 
 - `app/main.py` cria o cliente OpenWeatherMap e serve os arquivos em `static/`.
-- `GET /api/weather/current` consulta as condições atuais para o cartão inicial.
+- `GET /api/weather/current` oferece uma resposta somente com as condições atuais.
 - `GET /api/weather`, `/api/geo/search`, `/api/geo/reverse` e
   `/api/tiles/precipitation/{z}/{x}/{y}.png` estão conectadas ao cliente do provedor.
+- O painel busca as condições atuais e os blocos de previsão em `GET /api/weather`.
 - O painel usa a geolocalização do navegador e permite pesquisar e selecionar uma cidade.
+- O painel apresenta os dias disponíveis, as próximas 24 horas e a precipitação por minuto.
 - Os módulos de domínio e schemas dão às rotas contratos de resposta consistentes,
   documentados abaixo.
 - A chave da OpenWeatherMap não deve ser versionada. O arquivo `.env` é ignorado pelo
@@ -60,8 +63,10 @@ Abra <http://127.0.0.1:8000>. No Codespaces, encaminhe a porta `8000` pela aba
 
 Ao carregar a página, o navegador solicita sua localização e o painel tenta identificar
 o nome da cidade. Se a localização não estiver disponível, consulta Uberlândia como padrão.
-Use **Consultar outra cidade** para buscar e selecionar um resultado. Cada atualização do
-cartão consulta o endpoint de condições atuais da OpenWeatherMap.
+Use **Consultar outra cidade** para buscar e selecionar um resultado. Cada atualização
+consulta o clima atual e as previsões. A OpenWeatherMap pode receber até cinco chamadas
+por atualização, mais uma para cada alerta de clima retornado; isso pode consumir a cota
+da sua conta.
 
 ## Contrato inicial da API
 
@@ -79,9 +84,8 @@ ela nunca é devolvida nas respostas.
 
 ## Próximos passos
 
-1. Mostrar as previsões diária, por hora e por minuto na interface.
-2. Adicionar o mapa de precipitação e completar os estados da interface.
-3. Expandir os testes do navegador e atualizar a documentação dos requisitos.
+1. Adicionar o mapa de precipitação e completar os detalhes das condições atuais.
+2. Expandir os testes do navegador e atualizar a documentação dos requisitos.
 
 ## Segurança
 

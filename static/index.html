@@ -61,6 +61,24 @@
         <p class="weather-card__message" id="message" role="status" aria-live="polite"></p>
         <button class="retry-button" id="retry" type="button" hidden>Tentar novamente</button>
       </section>
+
+      <section class="forecast-card" aria-labelledby="daily-title">
+        <h2 id="daily-title">Previsão diária</h2>
+        <p class="forecast-summary" id="daily-summary" role="status" aria-live="polite"></p>
+        <div class="daily-forecast" id="daily-forecast" aria-label="Escolha um dia"></div>
+      </section>
+
+      <section class="forecast-card" aria-labelledby="hourly-title">
+        <h2 id="hourly-title">Próximas 24 horas</h2>
+        <div class="hourly-chart" id="hourly-chart"></div>
+        <div class="hourly-forecast" id="hourly-forecast"></div>
+      </section>
+
+      <section class="forecast-card" aria-labelledby="minutely-title">
+        <h2 id="minutely-title">Chuva minuto a minuto</h2>
+        <p class="forecast-summary" id="minutely-summary" role="status" aria-live="polite"></p>
+        <div class="minutely-chart" id="minutely-chart"></div>
+      </section>
     </main>
     <script type="module" src="/static/js/main.js"></script>
   </body>

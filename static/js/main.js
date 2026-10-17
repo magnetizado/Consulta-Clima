@@ -1,3 +1,5 @@
+import { renderForecasts, showForecastError, showForecastLoading } from "./forecasts.js";
+
 const fallbackLocation = {
   latitude: -18.9186,
   longitude: -48.2772,
@@ -77,7 +79,14 @@ async function identifyLocation(location) {
     }
     const body = await response.json();
     if (body.result) {
-      return { location: { ...location, label: cityLabel(body.result) }, notice: "" };
+      return {
+        location: {
+          ...location,
+          label: cityLabel(body.result),
+          reverseGeocode: false,
+        },
+        notice: "",
+      };
     }
   } catch {
     return {
@@ -87,14 +96,16 @@ async function identifyLocation(location) {
   }
 
   return {
-    location: { ...location, label: "Sua localização" },
+    location: { ...location, label: "Sua localização", reverseGeocode: false },
     notice: "Não encontramos um nome de cidade para estas coordenadas.",
   };
 }
 
 let currentLocation;
+let weatherLoadGeneration = 0;
 
 async function loadWeather(location = currentLocation) {
+  const generation = ++weatherLoadGeneration;
   retryButton.hidden = true;
   retryButton.disabled = true;
   messageElement.textContent = "";
@@ -103,17 +114,27 @@ async function loadWeather(location = currentLocation) {
   feelsLikeElement.textContent = "--";
   humidityElement.textContent = "--";
   iconElement.removeAttribute("src");
+  showForecastLoading();
 
   try {
     const requestedLocation = location ?? (await getLocation());
+    if (generation !== weatherLoadGeneration) {
+      return;
+    }
     const identified = await identifyLocation(requestedLocation);
+    if (generation !== weatherLoadGeneration) {
+      return;
+    }
     currentLocation = identified.location;
     locationElement.textContent = currentLocation.label;
     const query = new URLSearchParams({
       lat: String(currentLocation.latitude),
       lon: String(currentLocation.longitude),
     });
-    const response = await fetch(`/api/weather/current?${query}`);
+    const response = await fetch(`/api/weather?${query}`);
+    if (generation !== weatherLoadGeneration) {
+      return;
+    }
 
     if (!response.ok) {
       const body = await response.json();
@@ -121,19 +142,38 @@ async function loadWeather(location = currentLocation) {
     }
 
     const weather = await response.json();
-    iconElement.src = `https://openweathermap.org/img/wn/${encodeURIComponent(weather.icon)}@2x.png`;
-    temperatureElement.textContent = `${Math.round(weather.temperature)}°`;
-    descriptionElement.textContent = weather.description;
-    feelsLikeElement.textContent = `${Math.round(weather.feels_like)}°`;
-    humidityElement.textContent = `${weather.humidity}%`;
+    const current = weather.current;
+    if (
+      !current ||
+      !Number.isFinite(current.temp) ||
+      !Number.isFinite(current.feels_like) ||
+      !Number.isFinite(current.humidity) ||
+      !Array.isArray(current.weather) ||
+      typeof current.weather[0]?.description !== "string" ||
+      typeof current.weather[0]?.icon !== "string"
+    ) {
+      throw new Error("O serviço de clima não retornou as condições atuais.");
+    }
+    iconElement.src = `https://openweathermap.org/img/wn/${encodeURIComponent(current.weather[0].icon)}@2x.png`;
+    temperatureElement.textContent = `${Math.round(current.temp)}°`;
+    descriptionElement.textContent = current.weather[0].description;
+    feelsLikeElement.textContent = `${Math.round(current.feels_like)}°`;
+    humidityElement.textContent = `${current.humidity}%`;
     messageElement.textContent = identified.notice;
+    renderForecasts(weather);
   } catch (error) {
+    if (generation !== weatherLoadGeneration) {
+      return;
+    }
     descriptionElement.textContent = "Clima indisponível";
     messageElement.textContent =
       error instanceof Error ? error.message : "Ocorreu um erro inesperado ao carregar o clima.";
+    showForecastError();
     retryButton.hidden = false;
   } finally {
-    retryButton.disabled = false;
+    if (generation === weatherLoadGeneration) {
+      retryButton.disabled = false;
+    }
   }
 }
 

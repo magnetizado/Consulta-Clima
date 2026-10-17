@@ -61,14 +61,38 @@ def test_search_selects_city_and_refreshes_weather(page: Page, frontend_url: str
                     }
                 ]
             }
-        elif url.path == "/api/weather/current":
+        elif url.path == "/api/weather":
             weather_queries.append(parse_qs(url.query))
             body = {
-                "temperature": 20.5,
-                "feels_like": 21.1,
-                "humidity": 52,
-                "description": "céu limpo",
-                "icon": "01d",
+                "timezone_offset": 0,
+                "current": {
+                    "temp": 20.5,
+                    "feels_like": 21.1,
+                    "humidity": 52,
+                    "weather": [{"description": "céu limpo", "icon": "01d"}],
+                },
+                "daily": [
+                    {
+                        "dt": 1704067200,
+                        "temp": {"min": 15, "max": 24},
+                        "pop": 0.25,
+                        "weather": [{"description": "céu limpo"}],
+                    },
+                    {
+                        "dt": 1704153600,
+                        "temp": {"min": 16, "max": 22},
+                        "pop": 0,
+                        "weather": [{"description": "nublado"}],
+                    },
+                ],
+                "hourly": [
+                    {"dt": 1704067200, "temp": 20.5, "pop": 0.25},
+                    {"dt": 1704070800, "temp": 21, "pop": 0},
+                ],
+                "minutely": [
+                    {"dt": 1704067200, "precipitation": 0.2},
+                    {"dt": 1704067260, "precipitation": 0.3},
+                ],
             }
         else:
             route.fulfill(status=404, json={"error": {"code": "not_found"}})
@@ -84,6 +108,16 @@ def test_search_selects_city_and_refreshes_weather(page: Page, frontend_url: str
 
     expect(page.locator("#location")).to_have_text("São Paulo, BR")
     expect(page.locator("#temperature")).to_have_text("21°")
+    expect(page.locator("#daily-summary")).to_contain_text("Hoje: céu limpo")
+    expect(page.locator("#hourly-chart svg")).to_have_count(1)
+    expect(page.locator("#hourly-forecast article")).to_have_count(2)
+    expect(page.locator("#minutely-chart .minutely-chart__item")).to_have_count(2)
+    expect(page.locator("#minutely-summary")).to_have_text(
+        "Precipitação prevista na próxima hora: 0,5 mm."
+    )
+    page.locator(".daily-forecast__day").nth(1).click()
+    expect(page.locator("#daily-summary")).to_contain_text("terça-feira: nublado")
+    expect(page.locator(".daily-forecast__day").nth(1)).to_have_attribute("aria-pressed", "true")
 
     page.get_by_label("Consultar outra cidade").fill("Curitiba")
     page.get_by_role("button", name="Buscar").click()
