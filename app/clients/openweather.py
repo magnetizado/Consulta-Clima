@@ -154,6 +154,16 @@ class OpenWeatherClient:
         logger.warning("Falha no provedor: %s %s HTTP %s", label, code, status or "-")
         return ProviderError(code, status)
 
+    async def current(self, lat: float, lon: float) -> Response:
+        """Condições atuais em unidades métricas e em português (RN-059)."""
+        response = await self._json(
+            "onecall/current",
+            ONECALL_URL + "current",
+            {"lat": lat, "lon": lon, "units": "metric", "lang": "pt_br"},
+            dict,
+        )
+        return merge_onecall(response, None, [], None, None)
+
     async def _get(
         self, label: str, url: str, params: dict[str, Any], *, missing_ok: bool = False
     ) -> httpx.Response | None:

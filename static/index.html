@@ -14,15 +14,30 @@
         <h1>Consulta Clima</h1>
       </header>
 
-      <section class="welcome" aria-labelledby="welcome-title">
-        <div class="welcome__icon" aria-hidden="true">☁</div>
-        <h2 id="welcome-title">Bem-vindo ao seu painel do tempo</h2>
-        <p>
-          A estrutura inicial do frontend está pronta. As condições atuais e as previsões
-          aparecerão aqui quando a integração com a API estiver conectada.
-        </p>
-        <p class="welcome__status" role="status">Frontend carregado</p>
+      <section class="weather-card" aria-labelledby="weather-title">
+        <p class="weather-card__location" id="location">Buscando localização…</p>
+        <div class="weather-card__main">
+          <img class="weather-card__icon" id="weather-icon" alt="">
+          <div>
+            <h2 class="weather-card__temperature" id="temperature">--°</h2>
+            <p class="weather-card__description" id="description">Carregando clima…</p>
+          </div>
+        </div>
+        <h3 id="weather-title">Condições atuais</h3>
+        <dl class="weather-details">
+          <div>
+            <dt>Sensação térmica</dt>
+            <dd id="feels-like">--</dd>
+          </div>
+          <div>
+            <dt>Umidade</dt>
+            <dd id="humidity">--</dd>
+          </div>
+        </dl>
+        <p class="weather-card__message" id="message" role="status" aria-live="polite"></p>
+        <button class="retry-button" id="retry" type="button" hidden>Tentar novamente</button>
       </section>
     </main>
+    <script type="module" src="/static/js/main.js"></script>
   </body>
 </html>

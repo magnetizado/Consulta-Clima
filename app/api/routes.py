@@ -6,12 +6,13 @@ levanta `InvalidRequestError` antes de qualquer chamada ao provedor.
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Path, Query, Request, Response
-
-from app.clients.openweather import OpenWeatherClient
 from app.domain.view_model import build_search_result, build_weather_view
 from app.schemas.provider import GeoResult, OneCallBundle
 from app.schemas.view import CitySearchResult, ReverseResult, WeatherView
+from fastapi import APIRouter, Depends, Path, Query, Response
+
+from app.api.dependencies import get_client
+from app.clients.openweather import OpenWeatherClient
 
 MIN_TERM = 2  # RN-004
 MAX_TERM = 100
@@ -22,11 +23,6 @@ router = APIRouter(prefix="/api")
 
 class InvalidRequestError(Exception):
     """Parâmetro fora do contrato da seção 6.1. Vira `400 invalid_request`."""
-
-
-def get_client(request: Request) -> OpenWeatherClient:
-    """Cliente do provedor criado no `lifespan` da aplicação, ou o que os testes injetam."""
-    return request.app.state.client
 
 
 Client = Annotated[OpenWeatherClient, Depends(get_client)]
